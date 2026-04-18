@@ -7,9 +7,16 @@ const EMBED_MODEL = 'nvidia/nv-embed-v1';
 const STATE_FILE = path.join(__dirname, '../../keys-state.json');
 
 // Keys: NVIDIA_API_KEYS=key1,key2,...  or fall back to NVIDIA_API_KEY
+// Handles multi-line .env values by stripping embedded newlines before splitting
 function loadKeys() {
   const multi = process.env.NVIDIA_API_KEYS;
-  if (multi) return multi.split(',').map((k) => k.trim()).filter(Boolean);
+  if (multi) {
+    return multi
+      .replace(/\r?\n/g, ',')   // newlines → commas (handles accidental line breaks in .env)
+      .split(',')
+      .map((k) => k.trim())
+      .filter(Boolean);
+  }
   const single = process.env.NVIDIA_API_KEY;
   if (single) return [single.trim()];
   return [];
